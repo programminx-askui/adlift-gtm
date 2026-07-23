@@ -150,6 +150,16 @@ def test_example_campaigns_are_seeded():
     assert "scale_experiment" in actions
 
 
+def test_ai_analysis_requires_claude_and_handles_missing_campaign():
+    # Unknown campaign → 404.
+    assert client.post("/campaigns/nope/ai-analysis").status_code == 404
+    # Known campaign but stub brain (default) → 400 with a helpful message.
+    cid = _new_campaign()["id"]
+    r = client.post(f"/campaigns/{cid}/ai-analysis")
+    assert r.status_code == 400
+    assert "claude" in r.json()["detail"].lower()
+
+
 def test_google_status_reports_not_configured():
     s = client.get("/integrations/google/status").json()
     assert s["connected"] is False

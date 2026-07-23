@@ -139,6 +139,10 @@ async function renderCampaign(id) {
     ${analysis.suggestions.length
       ? analysis.suggestions.map((s) => `<div class="suggestion">${badge(s.action)}<span><b>${esc(s.target)}</b> — ${esc(s.rationale)}</span></div>`).join("")
       : `<p class="muted">Import performance data to generate suggestions.</p>`}
+
+    <div class="row"><h2>✨ Analyse with Claude</h2><div class="spacer"></div>
+      <button class="sm" id="ai-analyse">Analyse campaign</button></div>
+    <div id="ai-out" class="muted">AI-written, prioritized improvements for this campaign's audience, messaging, landing pages, and budget.</div>
   `;
 
   document.getElementById("add-exp").onclick = async () => {
@@ -158,6 +162,31 @@ async function renderCampaign(id) {
       )
     );
     renderCampaign(id);
+  };
+
+  document.getElementById("ai-analyse").onclick = async () => {
+    const out = document.getElementById("ai-out");
+    const btn = document.getElementById("ai-analyse");
+    btn.disabled = true;
+    out.textContent = "Analysing with Claude…";
+    try {
+      const r = await api(`/campaigns/${id}/ai-analysis`, { method: "POST" });
+      const cls = (p) => (p === "high" ? "action" : p === "medium" ? "warning" : "");
+      out.innerHTML =
+        `<p>${esc(r.summary)}</p>` +
+        r.recommendations
+          .map(
+            (x) => `<div class="insight ${cls(x.priority)}">
+              <div class="row"><b>${esc(x.title)}</b><div class="spacer"></div>${badge(x.priority)}</div>
+              <p style="margin:.3rem 0">${esc(x.rationale)}</p>
+              <p class="muted" style="margin:0">→ ${esc(x.suggested_action)}</p></div>`
+          )
+          .join("");
+    } catch (err) {
+      out.innerHTML = `⚠️ ${esc(detailOf(err))}`;
+    } finally {
+      btn.disabled = false;
+    }
   };
 }
 

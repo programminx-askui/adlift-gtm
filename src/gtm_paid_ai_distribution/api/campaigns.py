@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from ..ai.advisor import AiRecommendations, ai_recommendations
 from ..ai.insights import CampaignAnalysis, analyze_campaign
 from ..campaigns.models import (
     Audience,
@@ -15,6 +16,7 @@ from ..campaigns.models import (
     Experiment,
 )
 from ..campaigns.service import service
+from ..config import settings
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -75,6 +77,25 @@ def campaign_analysis(campaign_id: str) -> CampaignAnalysis:
     if campaign is None:
         raise HTTPException(status_code=404, detail="Campaign not found")
     return analyze_campaign(campaign)
+
+
+@router.post("/{campaign_id}/ai-analysis", response_model=AiRecommendations)
+def campaign_ai_analysis(campaign_id: str) -> AiRecommendations:
+    """AI-written improvement recommendations for the campaign (via Claude)."""
+    campaign = service.get(campaign_id)
+    if campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    if not settings.use_llm:
+        raise HTTPException(
+            status_code=400,
+            detail="AI analysis needs Claude — set GTM_CHAT_BRAIN=claude and ANTHROPIC_API_KEY.",
+        )
+    try:
+        return ai_recommendations(campaign)
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"Claude analysis failed: {exc}") from exc
 
 
 # --- Experiments nested under a campaign ---------------------------------
