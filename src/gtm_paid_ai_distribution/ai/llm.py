@@ -26,9 +26,12 @@ def get_client() -> anthropic.Anthropic:
     Uses the key from settings (read from ANTHROPIC_API_KEY / .env) when present;
     otherwise defers to the SDK's own credential resolution (env / `ant` profile).
     """
+    # Bound latency: fail fast on a stalled connection instead of hanging on the
+    # SDK's 10-minute default. One retry keeps transient blips recoverable.
+    opts = {"timeout": 60.0, "max_retries": 1}
     if settings.anthropic_api_key:
-        return anthropic.Anthropic(api_key=settings.anthropic_api_key)
-    return anthropic.Anthropic()
+        return anthropic.Anthropic(api_key=settings.anthropic_api_key, **opts)
+    return anthropic.Anthropic(**opts)
 
 
 def generate_structured(system: str, user: str, schema: type[T]) -> T:
@@ -41,6 +44,8 @@ def generate_structured(system: str, user: str, schema: type[T]) -> T:
         model=settings.anthropic_model,
         max_tokens=4096,
         system=system,
+        # Thinking off keeps structured generation fast and low-latency.
+        thinking={"type": "disabled"},
         messages=[{"role": "user", "content": user}],
         output_format=schema,
     )
@@ -55,6 +60,7 @@ def chat_reply(system: str, history: list[dict[str, str]], user_input: str) -> s
         max_tokens=2048,
         system=system,
         thinking={"type": "adaptive"},
+        output_config={"effort": "low"},  # keep chat responsive
         messages=messages,
     )
     return "".join(b.text for b in response.content if b.type == "text").strip()

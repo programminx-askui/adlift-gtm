@@ -28,7 +28,8 @@ class Settings(BaseSettings):
     # Chatbot / generation brain: "stub" (no key needed) or "claude" (real LLM).
     chat_brain: str = "stub"
     # Anthropic model id used when chat_brain == "claude".
-    anthropic_model: str = "claude-opus-4-8"
+    # Sonnet 5 is the speed/quality sweet spot for generation + analysis.
+    anthropic_model: str = "claude-sonnet-5"
     # Anthropic key. Read from ANTHROPIC_API_KEY (no GTM_ prefix) so the plain
     # env var / .env line works; falls back to the SDK's own resolution if empty.
     anthropic_api_key: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")

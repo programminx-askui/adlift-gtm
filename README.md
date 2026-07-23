@@ -85,6 +85,21 @@ Google Ads is wired end-to-end (the other platforms are stubs):
 Going live requires a Google Ads **developer token** with API access (approval can take
 days) and an OAuth client — see [developers.google.com/google-ads/api](https://developers.google.com/google-ads/api/docs/first-call/overview).
 
+## Hosting
+
+Two ready-to-go options (pick one):
+
+**Render (recommended — persistent process).** `render.yaml` is a blueprint:
+New → Blueprint → pick the repo → Apply. Runs a normal server, so in-memory data
+persists while the instance is up (still resets on redeploy — add a DB for durability).
+
+**Vercel (serverless).** `vercel.json` + `api/index.py` + `requirements.txt`:
+`vercel --prod`. Ephemeral, so created data doesn't survive cold starts (seeded
+examples always show); `google-ads` is excluded from the build.
+
+For either, set secrets in the host's dashboard (never commit): `ANTHROPIC_API_KEY`,
+`GTM_CHAT_BRAIN=claude` for real AI, and any `GTM_GOOGLE_*`.
+
 ## CI
 
 `.github/workflows/ci.yml` runs ruff + pytest on every push to `main` and every PR
