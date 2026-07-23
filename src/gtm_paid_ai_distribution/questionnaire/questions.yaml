@@ -1,0 +1,29 @@
+# =============================================================================
+# Campaign Creation wizard (PRD FR1).
+# Captures the structured inputs the AI needs to generate a campaign draft.
+# The free-text product description can also arrive via the chat endpoint.
+# Question types: text | number | single_choice | multi_choice | boolean
+# =============================================================================
+id: campaign_creation
+title: Create Campaign
+description: Tell us about your product and goals; the AI drafts the rest.
+
+questions:
+  - id: product_description
+    prompt: Describe your product in a sentence or two.
+    type: text
+    help_text: e.g. "We help SDR teams automate account research."
+
+  - id: goal
+    prompt: What is the campaign goal?
+    type: single_choice
+    options: [awareness, traffic, leads, sales]
+
+  - id: monthly_budget
+    prompt: What is your monthly budget (USD)?
+    type: number
+
+  - id: geography
+    prompt: What geography are you targeting?
+    type: text
+    help_text: e.g. "United States, DACH, Global"

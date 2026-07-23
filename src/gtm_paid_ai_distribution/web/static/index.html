@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AdLift — AI Campaign Optimizer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Cpath d='M20 29V14M14 19l6-6 6 6' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 40 40" role="img" aria-label="Adlift logo">
+            <defs>
+              <linearGradient id="adlift-g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#4f46e5" />
+                <stop offset="1" stop-color="#7c3aed" />
+              </linearGradient>
+            </defs>
+            <rect width="40" height="40" rx="11" fill="url(#adlift-g)" />
+            <path d="M20 29 V14 M14 19 l6 -6 6 6" stroke="#fff" stroke-width="2.6"
+              fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            <rect x="13" y="30.5" width="14" height="2.2" rx="1.1" fill="rgba(255,255,255,.8)" />
+          </svg>
+          <span class="brand-name">AdLift<br /><em>Campaign AI</em></span>
+        </div>
+        <nav>
+          <a href="#/campaigns" data-match="campaigns">📊 Campaigns</a>
+          <a href="#/new" data-match="new">✨ New campaign</a>
+          <a href="#/integrations" data-match="integrations">🔌 Integrations</a>
+          <a href="#/about" data-match="about">ℹ️ About</a>
+        </nav>
+        <div class="sidebar-foot muted">B2B SaaS · AI-native</div>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="menu-btn" id="menu-btn" aria-label="Menu">☰</button>
+          <div id="breadcrumb" class="breadcrumb"></div>
+        </header>
+        <main id="view" class="view"></main>
+      </div>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
