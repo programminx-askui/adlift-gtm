@@ -63,7 +63,8 @@ def get_campaign(campaign_id: str) -> Campaign:
 
 @router.patch("/{campaign_id}", response_model=Campaign)
 def update_campaign(campaign_id: str, req: UpdateCampaignRequest) -> Campaign:
-    changes = req.model_dump(exclude_none=True)
+    # Keep nested model instances (not dicts) so model_copy stores real models.
+    changes = {k: v for k, v in vars(req).items() if v is not None}
     campaign = service.update(campaign_id, changes)
     if campaign is None:
         raise HTTPException(status_code=404, detail="Campaign not found")

@@ -44,7 +44,8 @@ def get_experiment(experiment_id: str) -> Experiment:
 
 @router.patch("/{experiment_id}", response_model=Experiment)
 def update_experiment(experiment_id: str, req: UpdateExperimentRequest) -> Experiment:
-    changes = req.model_dump(exclude_none=True)
+    # Keep nested model instances (not dicts) so model_copy stores real models.
+    changes = {k: v for k, v in vars(req).items() if v is not None}
     exp = service.update_experiment(experiment_id, changes)
     if exp is None:
         raise HTTPException(status_code=404, detail="Experiment not found")

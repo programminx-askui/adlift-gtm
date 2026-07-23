@@ -108,10 +108,26 @@ async function renderCampaign(id) {
     <p class="muted">${esc(c.goal)} · ${money(c.monthly_budget)}/mo · ${esc(c.geography || "—")}</p>
 
     <div class="card">
-      <h3>🎯 Audience <span class="muted">(campaign-level)</span></h3>
-      <p>${esc(a.icp)} — ${esc(a.company_size)}</p>
-      <p class="muted">Industries: ${esc((a.industries || []).join(", "))}<br/>
-        Titles: ${esc((a.job_titles || []).join(", "))}</p>
+      <div class="row"><h3>🎯 Audience <span class="muted">(campaign-level)</span></h3>
+        <div class="spacer"></div><button class="ghost sm" id="aud-edit">Edit</button></div>
+      <div id="aud-view">
+        <p>${esc(a.icp)} — ${esc(a.company_size)}</p>
+        <p class="muted">Industries: ${esc((a.industries || []).join(", "))}<br/>
+          Titles: ${esc((a.job_titles || []).join(", "))}<br/>
+          Keywords: ${esc((a.keywords || []).join(", "))} · Exclusions: ${esc((a.exclusions || []).join(", "))}</p>
+      </div>
+      <div id="aud-form" class="hidden">
+        <label>ICP</label><input id="aud-icp" value="${esc(a.icp)}" />
+        <label>Company size</label><input id="aud-size" value="${esc(a.company_size)}" />
+        <label>Industries (comma-separated)</label><input id="aud-ind" value="${esc((a.industries || []).join(", "))}" />
+        <label>Job titles</label><input id="aud-titles" value="${esc((a.job_titles || []).join(", "))}" />
+        <label>Keywords</label><input id="aud-kw" value="${esc((a.keywords || []).join(", "))}" />
+        <label>Exclusions</label><input id="aud-exc" value="${esc((a.exclusions || []).join(", "))}" />
+        <div class="row" style="margin-top:.7rem">
+          <button class="sm" id="aud-save">Save audience</button>
+          <button class="ghost sm" id="aud-cancel">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <div class="row"><h2>🧪 Experiments (A/B)</h2><div class="spacer"></div>
@@ -145,6 +161,33 @@ async function renderCampaign(id) {
     <div id="ai-out" class="muted">AI-written, prioritized improvements for this campaign's audience, messaging, landing pages, and budget.</div>
   `;
 
+  const audEdit = document.getElementById("aud-edit");
+  if (audEdit) {
+    const view = document.getElementById("aud-view");
+    const form = document.getElementById("aud-form");
+    audEdit.onclick = () => { view.classList.add("hidden"); form.classList.remove("hidden"); };
+    document.getElementById("aud-cancel").onclick = () => {
+      form.classList.add("hidden"); view.classList.remove("hidden");
+    };
+    const csv = (x) => document.getElementById(x).value.split(",").map((s) => s.trim()).filter(Boolean);
+    document.getElementById("aud-save").onclick = async () => {
+      await api(`/campaigns/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          audience: {
+            icp: document.getElementById("aud-icp").value,
+            company_size: document.getElementById("aud-size").value,
+            industries: csv("aud-ind"),
+            job_titles: csv("aud-titles"),
+            keywords: csv("aud-kw"),
+            exclusions: csv("aud-exc"),
+          },
+        }),
+      });
+      renderCampaign(id);
+    };
+  }
+
   document.getElementById("add-exp").onclick = async () => {
     await api(`/campaigns/${id}/experiments`, {
       method: "POST",
@@ -168,7 +211,7 @@ async function renderCampaign(id) {
     const out = document.getElementById("ai-out");
     const btn = document.getElementById("ai-analyse");
     btn.disabled = true;
-    out.textContent = "Analysing with Claude…";
+    out.textContent = "Analysing with Claude… (this can take ~30s)";
     try {
       const r = await api(`/campaigns/${id}/ai-analysis`, { method: "POST" });
       const cls = (p) => (p === "high" ? "action" : p === "medium" ? "warning" : "");
@@ -212,10 +255,17 @@ async function renderExperiment(id) {
     </div>
 
     <div class="card">
-      <h3>✍️ Marketing message</h3>
-      <p><b>${esc(e.message.headline)}</b></p>
-      <p>${esc(e.message.description)}</p>
-      <p class="badge brand">CTA: ${esc(e.message.cta)}</p>
+      <h3>✍️ Marketing message <span class="muted">(editable)</span></h3>
+      <label>Headline</label>
+      <input id="m-headline" value="${esc(e.message.headline)}" />
+      <label>Description</label>
+      <textarea id="m-desc" rows="2">${esc(e.message.description)}</textarea>
+      <label>Call to action</label>
+      <input id="m-cta" value="${esc(e.message.cta)}" />
+      <div class="row" style="margin-top:.7rem">
+        <button class="sm" id="save-msg">Save message</button>
+        <span id="m-msg" class="muted"></span>
+      </div>
     </div>
 
     <div class="card">
@@ -264,6 +314,17 @@ async function renderExperiment(id) {
       body: JSON.stringify({ snapshots: [sampleSnapshot(2)] }),
     });
     renderExperiment(id);
+  };
+  document.getElementById("save-msg").onclick = async () => {
+    const el = (x) => document.getElementById(x).value;
+    await api(`/experiments/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        message: { headline: el("m-headline"), description: el("m-desc"), cta: el("m-cta") },
+      }),
+    });
+    document.getElementById("m-msg").textContent = "✅ Saved — landing preview updated.";
+    document.querySelector(".preview iframe").src = `/experiments/${id}/landing?t=${Date.now()}`;
   };
 }
 

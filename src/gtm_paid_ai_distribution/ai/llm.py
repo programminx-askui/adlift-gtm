@@ -21,7 +21,13 @@ T = TypeVar("T", bound=BaseModel)
 
 @lru_cache(maxsize=1)
 def get_client() -> anthropic.Anthropic:
-    """Lazily construct a shared Anthropic client (credentials from env)."""
+    """Lazily construct a shared Anthropic client.
+
+    Uses the key from settings (read from ANTHROPIC_API_KEY / .env) when present;
+    otherwise defers to the SDK's own credential resolution (env / `ant` profile).
+    """
+    if settings.anthropic_api_key:
+        return anthropic.Anthropic(api_key=settings.anthropic_api_key)
     return anthropic.Anthropic()
 
 

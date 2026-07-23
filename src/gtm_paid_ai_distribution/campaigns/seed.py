@@ -37,6 +37,7 @@ def _landing(hero: str, benefits: list[str]) -> LandingPage:
 def _sdr_campaign() -> Campaign:
     """The PRD example: an AI SDR platform, with a clear A/B winner."""
     winner = Experiment(
+        id="exp_example_sdr_a",
         name="Variant A",
         channel=Channel.linkedin,
         status=ExperimentStatus.winner,
@@ -54,6 +55,7 @@ def _sdr_campaign() -> Campaign:
         ],
     )
     laggard = Experiment(
+        id="exp_example_sdr_b",
         name="Variant B",
         channel=Channel.google,
         status=ExperimentStatus.running,
@@ -71,6 +73,7 @@ def _sdr_campaign() -> Campaign:
         ],
     )
     return Campaign(
+        id="cmp_example_sdr",
         product_description="We help SDR teams automate account research.",
         goal=CampaignGoal.leads,
         monthly_budget=6000,
@@ -91,6 +94,7 @@ def _sdr_campaign() -> Campaign:
 def _expense_campaign() -> Campaign:
     """A second example with only partial data (shows the 'needs data' state)."""
     return Campaign(
+        id="cmp_example_expense",
         product_description="AI-powered expense management for finance teams.",
         goal=CampaignGoal.sales,
         monthly_budget=9000,
@@ -106,6 +110,7 @@ def _expense_campaign() -> Campaign:
         ),
         experiments=[
             Experiment(
+                id="exp_example_expense_a",
                 name="Variant A",
                 channel=Channel.linkedin,
                 status=ExperimentStatus.draft,
@@ -120,6 +125,7 @@ def _expense_campaign() -> Campaign:
                 ),
             ),
             Experiment(
+                id="exp_example_expense_b",
                 name="Variant B",
                 channel=Channel.meta,
                 status=ExperimentStatus.draft,

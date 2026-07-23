@@ -96,6 +96,13 @@ def analyze_campaign(campaign: Campaign) -> CampaignAnalysis:
                     rationale="Low CTR usually means the headline is not resonating.",
                 )
             )
+            suggestions.append(
+                OptimizationSuggestion(
+                    action="new_cta",
+                    target=ea.name,
+                    rationale="Try a stronger call-to-action to lift click-through.",
+                )
+            )
         if m.clicks and m.conversion_rate < LOW_CONVERSION_RATE:
             insights.append(
                 Insight(
@@ -119,6 +126,19 @@ def analyze_campaign(campaign: Campaign) -> CampaignAnalysis:
                 title="Campaign not yet profitable",
                 detail=f"ROAS is {totals.roas:.2f}x (below {MIN_ROAS:.0f}x).",
                 severity=Severity.action,
+            )
+        )
+
+    # Poor conversion across the whole campaign points at audience/targeting.
+    if totals.clicks and totals.conversion_rate < LOW_CONVERSION_RATE:
+        suggestions.append(
+            OptimizationSuggestion(
+                action="new_audience",
+                target=campaign.id,
+                rationale=(
+                    "Clicks aren't converting campaign-wide — test a tighter or "
+                    "different audience (ICP, industries, or job titles)."
+                ),
             )
         )
 

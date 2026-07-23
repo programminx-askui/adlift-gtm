@@ -89,6 +89,34 @@ def test_metrics_import_and_campaign_analysis_picks_winner():
     assert "pause_experiment" in actions
 
 
+def test_edit_audience_and_message_persist():
+    c = _new_campaign()
+    # FR2 — edit the campaign audience.
+    updated = client.patch(
+        f"/campaigns/{c['id']}",
+        json={"audience": {"icp": "Heads of RevOps", "industries": ["SaaS"]}},
+    ).json()
+    assert updated["audience"]["icp"] == "Heads of RevOps"
+    # FR3 — edit an experiment's message.
+    exp = c["experiments"][0]
+    r = client.patch(
+        f"/experiments/{exp['id']}",
+        json={"message": {"headline": "Edited headline", "description": "d", "cta": "Go"}},
+    ).json()
+    assert r["message"]["headline"] == "Edited headline"
+
+
+def test_fr7_emits_new_cta_and_new_audience():
+    c = _new_campaign()
+    exp = c["experiments"][0]
+    # Low CTR (0.5%) and zero conversions → should trigger new_cta + new_audience.
+    client.post(f"/experiments/{exp['id']}/metrics", json={"snapshots": [
+        {"impressions": 10000, "clicks": 50, "conversions": 0, "spend": 200, "revenue": 0}]})
+    actions = {s["action"] for s in client.get(f"/campaigns/{c['id']}/analysis").json()["suggestions"]}
+    assert "new_cta" in actions
+    assert "new_audience" in actions
+
+
 def test_experiment_level_analysis():
     c = _new_campaign()
     exp = c["experiments"][0]

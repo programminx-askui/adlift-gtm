@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -28,6 +29,9 @@ class Settings(BaseSettings):
     chat_brain: str = "stub"
     # Anthropic model id used when chat_brain == "claude".
     anthropic_model: str = "claude-opus-4-8"
+    # Anthropic key. Read from ANTHROPIC_API_KEY (no GTM_ prefix) so the plain
+    # env var / .env line works; falls back to the SDK's own resolution if empty.
+    anthropic_api_key: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
 
     # Path to the data-driven questionnaire definition.
     questionnaire_path: Path = PACKAGE_DIR / "questionnaire" / "questions.yaml"

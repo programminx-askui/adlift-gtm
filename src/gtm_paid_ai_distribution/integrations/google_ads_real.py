@@ -20,6 +20,7 @@ import json
 import logging
 import urllib.parse
 import urllib.request
+from functools import lru_cache
 
 from ..campaigns.models import MetricsSnapshot
 from ..config import settings
@@ -79,6 +80,7 @@ class GoogleAdsCredentials:
         return cfg
 
 
+@lru_cache(maxsize=1)
 def library_available() -> bool:
     try:
         import google.ads.googleads.client  # noqa: F401
