@@ -9,7 +9,7 @@ services:
     startCommand: "uv run --no-sync uvicorn gtm_paid_ai_distribution.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.12"
       - key: GTM_CHAT_BRAIN
         value: stub # set to "claude" in the dashboard once ANTHROPIC_API_KEY is added
       # Add secrets in the Render dashboard (never commit them):
